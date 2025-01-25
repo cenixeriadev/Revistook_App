@@ -1,4 +1,4 @@
 # Importar vistas principales
-from .views.main_view import MainView
+from .views.main_view import BookDownloaderApp
 
-__all__ = ["MainView"]
+__all__ = ["BookDownloaderApp"]

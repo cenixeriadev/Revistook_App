@@ -1,4 +1,4 @@
 # Importar repositorios concretos
-from .file_book_repository import FileBookRepository
+#from .file_book_repository import FileBookRepository
 
-__all__ = ["FileBookRepository"]
+#__all__ = ["FileBookRepository"]
