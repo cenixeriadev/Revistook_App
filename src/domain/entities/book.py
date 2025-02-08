@@ -1,10 +1,12 @@
 # src/domain/entities/book.py
-class Book:
-    def __init__(self, title: str, author: str, url: str):
-        self.title = title
-        self.author = author
-        self.url = url
+from dataclasses import dataclass
 
-    def __repr__(self):
-        return f"Book(title={self.title}, author={self.author}, url={self.url})"
+@dataclass
+class Book:
+    id: str
+    title: str
+    author: str
+    url: str
+    cover_url: str  # Nuevo campo para la imagen
+    file_format: str = "PDF"
 

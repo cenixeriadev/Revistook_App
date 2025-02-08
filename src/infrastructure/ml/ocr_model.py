@@ -8,6 +8,7 @@ class OCRModel:
     def __init__(self):
         """Initialize OCR model using Tesseract"""
         self.logger = logging.getLogger(__name__)
+        pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract"
 
         # Verificar que tesseract está instalado
         try:

@@ -20,6 +20,8 @@ class BookDownloaderApp:
         self.page = None
         self.download_tasks = {}
         self.setup_directories()
+        self.directory_picker = ft.FilePicker(on_result=self.handle_directory_picked)
+        self.download_dir = str(Path.home() / "Downloads")
 
     def setup_directories(self):
         """Configura los directorios para guardar imágenes y audios"""
@@ -40,7 +42,7 @@ class BookDownloaderApp:
 
         # Configuración de la página
         page.title = "Book Downloader"
-        page.theme_mode = ft.ThemeMode.LIGHT
+        page.theme_mode = ft.ThemeMode.DARK
         page.padding = 20
         page.window_width = 1000
         page.window_height = 800
@@ -56,7 +58,8 @@ class BookDownloaderApp:
         )
 
         # Agregar file pickers a la página
-        page.overlay.extend([self.image_picker, self.audio_picker])
+        page.overlay.extend([self.image_picker, self.audio_picker, self.directory_picker])
+
 
         # Campo de búsqueda
         self.search_field = ft.TextField(
@@ -73,6 +76,11 @@ class BookDownloaderApp:
             "Buscar",
             icon=ft.icons.SEARCH,
             on_click=self.search_book
+        )
+        directory_button = ft.ElevatedButton(
+            "Seleccionar carpeta",
+            icon=ft.icons.FOLDER_OPEN,
+            on_click=lambda _: self.directory_picker.get_directory_path()
         )
 
         # Botón para capturar imagen
@@ -137,10 +145,13 @@ class BookDownloaderApp:
                 ft.Row(
                     controls=[
                         camera_button,
-                        audio_button
+                        audio_button,
+                        directory_button
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing = 10
                 ),
+                ft.Text(f"Descargas en: {self.download_dir}", size=12, color=ft.colors.GREY_500),
                 self.preview,
                 self.progress_bar,
                 self.status_text,
@@ -149,7 +160,8 @@ class BookDownloaderApp:
                     border=ft.border.all(1, ft.colors.GREY_400),
                     border_radius=10,
                     padding=10
-                )
+                ),
+                
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
@@ -191,6 +203,12 @@ class BookDownloaderApp:
             self.status_text.value = f"Error procesando imagen: {str(ex)}"
         finally:
             self.page.update()
+    def handle_directory_picked(self, e: ft.FilePickerResultEvent):
+        if e.path:
+            self.download_dir = e.path
+            self.status_text.value = f"Directorio de descarga: {self.download_dir}"
+            self.page.update()
+
     def toggle_recording(self, e):
         """Inicia o detiene la grabación de audio"""
         if self.audio_recorder.recording:
@@ -237,34 +255,51 @@ class BookDownloaderApp:
             self.page.update()
 
     def create_book_card(self, book):
+    # Crear widget de imagen
+        cover_image = ft.Image(
+            src=book.cover_url, #if book.cover_url else "assets/placeholder.png",
+            width=100,
+            height=150,
+            fit=ft.ImageFit.CONTAIN,
+            border_radius=5
+        )
+        
         return ft.Card(
             content=ft.Container(
-                content=ft.Column(
+                content=ft.Row(  # Cambiamos a Row para imagen + info
                     controls=[
-                        ft.Text(book.title, size=20, weight=ft.FontWeight.BOLD),
-                        ft.Text(book.author),
-                        ft.Row(
+                        cover_image,
+                        ft.Column(
                             controls=[
-                                ft.ElevatedButton(
-                                    "Descargar",
-                                    icon=ft.icons.DOWNLOAD,
-                                    on_click=lambda e: self.start_download(book)
+                                ft.Text(book.title, size=18, weight=ft.FontWeight.BOLD),
+                                ft.Text(book.author, size=14, color=ft.colors.GREY_600),
+                                ft.Row(
+                                    controls=[
+                                        ft.ElevatedButton(
+                                            "Descargar",
+                                            icon=ft.icons.DOWNLOAD,
+                                            on_click=lambda e, b=book: self.start_download(b)
+                                        )
+                                    ]
+                                ),
+                                ft.ProgressBar(
+                                    width=200,
+                                    visible=False,
+                                    value=0,
+                                    bgcolor=ft.colors.GREY_200,
+                                    color=ft.colors.BLUE,
                                 )
-                            ]
-                        ),
-                        ft.ProgressBar(
-                            width=300,
-                            visible=False,
-                            value=0,
-                            bgcolor=ft.colors.GREY_200,
-                            color=ft.colors.BLUE,
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
                         )
-                    ]
+                    ],
+                    spacing=15
                 ),
-                padding=10
-            )
-        )
-
+                padding=15
+            ),
+            elevation=3
+        )        
 
     async def search_book(self, e):
         search_term = self.search_field.value
@@ -300,39 +335,27 @@ class BookDownloaderApp:
         task = asyncio.create_task(self.download_book(book, status))
         self.download_tasks[book.id] = (task, status)
 
+    # En main_view.py, actualizar el método de descarga:
     async def download_book(self, book, status):
         progress_bar = self.find_book_progress_bar(book)
-        if not progress_bar:
-            return
-
-        progress_bar.visible = True
-        self.page.update()
-
         try:
             status.state = DownloadState.DOWNLOADING
-
-            # Simular progreso de descarga
-            for i in range(0, 101, 10):
-                status.update_progress(i)
-                progress_bar.value = i / 100
-                await asyncio.sleep(0.5)  # Simular descarga
-                self.page.update()
-
-            await self.book_downloader.download(
-                book,
-                Path(self.directory_picker.value)
-            )
-
-            status.complete()
-            progress_bar.value = 1
-            self.status_text.value = f"{book.title} descargado correctamente"
-
+            download_path = self.download_dir  # O tu path preferido
+            
+            # Descarga real
+            Path(download_path).mkdir(parents=True , exist_ok= True)
+            file_path = await self.book_downloader.download(book, download_path)
+            
+            if file_path:
+                status.complete()
+                self.status_text.value = f"Descargado en: {file_path}"
+            else:
+                status.fail("Error en la descarga")
+                
         except Exception as ex:
             status.fail(str(ex))
-            self.status_text.value = f"Error en la descarga: {str(ex)}"
         finally:
             self.page.update()
-
     def find_book_progress_bar(self, book):
         # Buscar la barra de progreso en el card del libro
         for control in self.results_list.controls:
