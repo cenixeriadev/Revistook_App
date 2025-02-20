@@ -40,10 +40,9 @@ class BookDownloader:
             WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '//label[@for="covers"]'))
             ).click()
-
+            
             # Buscar elementos y escribir
-            search_form = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/form/div[1]/input')))
+            search_form = await self.find_element(By.XPATH, '/html/body/form/div[1]/input')
             search_form.send_keys(query)
 
             # Hacer clic en botón de búsqueda
@@ -68,24 +67,26 @@ class BookDownloader:
             EC.presence_of_element_located((By.XPATH, '//*[@id="tablelibgen"]/tbody/tr'))
             )
             rows = await self.find_elements(By.XPATH, '//*[@id="tablelibgen"]/tbody/tr')
-            print("LAS ROWS FUERON ENCONTRADAS")
-            for i, row in enumerate(rows[1:6]):
-                print("DENTRO DEL BUCLE ")
+            
+
+            for i, row in enumerate(rows[1:10]):
                 cells = row.find_elements(By.TAG_NAME, 'td')
                 try:
                     img_element = cells[0].find_element(By.TAG_NAME, 'img')
-                    print("SELECCIONANDO IMAGEN ELEMENTO")
+                
                     
                     cover_url = img_element.get_attribute('src').replace('_small' , '')
-                    print("CONSIGUIENDO LA URL DE LA CUBIERTA DEL LIBRO")
                     
-                    if not cover_url.startswith('http'):
+                    if cover_url=='':
+                        cover_url = "https://e7.pngegg.com/pngimages/829/733/png-clipart-logo-brand-product-trademark-font-not-found-logo-brand.png"
+                    if not cover_url.startswith('http' or 'https'):
                         cover_url = f"{self.base_url.rstrip('/')}{cover_url}"
+    
                     print(cover_url)
+                    
                 except:
-                    print("Error en la busqueda del cover_url")
                     cover_url = ""
-                print("CREANDO EL OBJETO DE TIPO Book")
+                
                 book = Book(
                     id=str(i),
                     title=cells[1].find_elements(By.TAG_NAME, 'a')[0].text,
@@ -94,6 +95,7 @@ class BookDownloader:
                     cover_url=cover_url
                 )
                 books.append(book)
+            
             return books
 
         except Exception as e:

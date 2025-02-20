@@ -258,7 +258,7 @@ class BookDownloaderApp:
 
     def create_book_card(self, book):
         cover_image = ft.Image(
-            src=book.cover_url,
+            src=book.cover_url if book.cover_url else "https://png.pngtree.com/png-clipart/20190925/original/pngtree-no-image-vector-illustration-isolated-png-image_4979075.jpg",
             width=100,
             height=150,
             fit=ft.ImageFit.CONTAIN,
@@ -276,8 +276,8 @@ class BookDownloaderApp:
             width=200,
             visible=False,
             value=0,
-            bgcolor=ft.colors.DEEP_ORANGE,
-            color=ft.colors.BLUE,
+            bgcolor=ft.colors.LIGHT_GREEN,
+            color=ft.colors.GREEN_200,
         )
         
         download_button = ft.ElevatedButton(
