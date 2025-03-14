@@ -17,7 +17,7 @@ A Python desktop application built with Flet that allows users to search for and
 ## Project Structure
 
 ```
-revistook-app/
+Revistook_app/
 ├── src/
 │   ├── application/
 │   │   ├── interfaces/
@@ -30,18 +30,21 @@ revistook-app/
 │   ├── domain/
 │   │   ├── entities/
 │   │   │   ├── download_status.py
-│   │   │   └── ...
+│   │   │   └── book.py
 │   │   ├── repositories/
 │   │   └── __init__.py
 │   ├── infrastructure/
 │   │   ├── repositories/
+|   |   ├── ml/
 │   │   └── __init__.py
 │   └── presentation/
 │       ├── views/
 │       │   ├── main_view.py
 │       │   └── ...
-│       └── __init__.py
-├── main.py
+│       |── __init__.py  
+|       ├── main.py
+├── requirements.txt
+├── .gitignore
 └── README.md
 ```
 
