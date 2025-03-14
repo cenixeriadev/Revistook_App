@@ -82,7 +82,6 @@ class BookDownloader:
                     if not cover_url.startswith('http' or 'https'):
                         cover_url = f"{self.base_url.rstrip('/')}{cover_url}"
     
-                    print(cover_url)
                     
                 except:
                     cover_url = ""

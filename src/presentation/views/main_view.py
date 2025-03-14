@@ -41,8 +41,8 @@ class BookDownloaderApp:
         self.page = page
         page.on_close = self.on_page_close
         # Configuración de la página
-        page.title = "Book Downloader"
-        page.theme_mode = ft.ThemeMode.LIGHT
+        page.title = "REVISTOOK"
+        page.theme_mode = ft.ThemeMode.DARK
         page.padding = 20
         page.window_width = 1000
         page.window_height = 800
@@ -135,7 +135,7 @@ class BookDownloaderApp:
         # Contenedor principal
         main_content = ft.Column(
             controls=[
-                ft.Text("Book Downloader", size=32, weight=ft.FontWeight.BOLD),
+                ft.Text("📚🆓", size=32, weight=ft.FontWeight.NORMAL ),
                 ft.Row(
                     controls=[
                         self.search_field,
