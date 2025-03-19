@@ -97,7 +97,8 @@ Revistook_app/
    - Use the "Capture Image" button to extract text from book covers or pages
    - Use the "Select Audio" button to transcribe spoken book requests
    - Select your preferred download directory
-
+>[!Note]
+>it's better to search using the ISBN code.
 3. Search results will show book covers, titles, and authors
    
 4. Click "Download" on any book to begin the download process
