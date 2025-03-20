@@ -19,7 +19,6 @@ class AudioRecognitionService:
         except Exception as e:
             self.logger.error(f"Error processing audio {audio_path}: {str(e)}")
             raise
-
     async def process_book_audio(self, book: Book) -> Book:
         """
         Procesa todos los archivos de audio de un libro y actualiza su contenido

@@ -6,6 +6,10 @@ from pathlib import Path
 import os
 from datetime import datetime
 import asyncio
+import sounddevice as sd
+from scipy.io.wavfile import write
+import numpy as np
+from datetime import datetime
 from src.application.services.book_downloader import BookDownloader
 from src.application.services.text_recognition import TextRecognitionService
 from src.application.services.audio_recognition import AudioRecognitionService
@@ -22,6 +26,9 @@ class BookDownloaderApp:
         self.setup_directories()
         self.directory_picker = ft.FilePicker(on_result=self.handle_directory_picked)
         self.download_dir = str(Path.home() / "Downloads")
+        self.is_recording = False
+        self.recording_filename = None
+        self.audio_data = []
 
     def setup_directories(self):
         """Configura los directorios para guardar imágenes y audios"""
@@ -51,14 +58,14 @@ class BookDownloaderApp:
         self.image_picker = ft.FilePicker(
             on_result=self.handle_image_picked
         )
-
-        # Configurar File Picker para audio
-        self.audio_picker = ft.FilePicker(
-            on_result=self.handle_audio_picked
+        self.record_button = ft.ElevatedButton(
+            "Grabar audio",
+            icon=ft.icons.MIC,
+            on_click=self.toggle_recording
         )
 
-        # Agregar file pickers a la página
-        page.overlay.extend([self.image_picker, self.audio_picker, self.directory_picker])
+        # Agregar componentes a la
+        page.overlay.extend([self.image_picker, self.directory_picker])
 
 
         # Campo de búsqueda
@@ -91,16 +98,6 @@ class BookDownloaderApp:
             on_click=lambda _: self.image_picker.pick_files(
                 allow_multiple=False,
                 allowed_extensions=['png', 'jpg', 'jpeg']
-            )
-        )
-
-        # Botón para grabar audio
-        audio_button = ft.ElevatedButton(
-            "Seleccionar audio",
-            icon=ft.icons.MIC,
-            on_click=lambda _: self.audio_picker.pick_files(
-                allow_multiple=False,
-                allowed_extensions=['wav', 'mp3']
             )
         )
 
@@ -146,7 +143,7 @@ class BookDownloaderApp:
                 ft.Row(
                     controls=[
                         camera_button,
-                        audio_button,
+                        self.record_button,
                         directory_button
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
@@ -211,50 +208,67 @@ class BookDownloaderApp:
             self.status_text.value = f"Directorio de descarga: {self.download_dir}"
             self.page.update()
 
-    def toggle_recording(self, e):
-        """Inicia o detiene la grabación de audio"""
-        if self.audio_recorder.recording:
-            self.audio_recorder.stop()
-            e.control.icon = ft.icons.MIC
-            e.control.text = "Grabar audio"
-            self.status_text.value = "Grabación finalizada"
-        else:
-            self.audio_recorder.record()
-            e.control.icon = ft.icons.STOP
-            e.control.text = "Detener grabación"
-            self.status_text.value = "Grabando..."
+    def start_recording(self):
+        self.is_recording = True
+        self.record_button.icon = ft.icons.STOP
+        self.record_button.text = "Detener grabación"
+        self.status_text.value = "Grabando..."
         self.page.update()
-
-    async def handle_audio_picked(self, e: ft.FilePickerResultEvent):
-        """Maneja la selección de audio"""
+        
+        # Configuración de grabación
+        self.recording_filename = datetime.now().strftime("%Y%m%d_%H%M%S") + ".wav"
+        self.audio_data = []
+        
+        # Inicia grabación en segundo plano
+        sd.default.samplerate = 16000
+        sd.default.channels = 1
+        sd.default.dtype = 'int16'
+        
+        self.stream = sd.InputStream(callback=self.audio_callback)
+        self.stream.start()
+    def audio_callback(self, indata, frames, time, status):
+        if status:
+            print(status)
+        self.audio_data.append(indata.copy())
+    def stop_recording(self):
+        self.is_recording = False
+        self.record_button.icon = ft.icons.MIC
+        self.record_button.text = "Grabar audio"
+        self.status_text.value = "Procesando grabación..."
+        self.page.update()
+        
+        # Detener grabación
+        self.stream.stop()
+        self.stream.close()
+        
+        # Guardar archivo WAV
+        audio_path = Path(self.audio_dir) / self.recording_filename
+        audio_data = np.concatenate(self.audio_data)
+        write(str(audio_path), 16000, audio_data)
+        
+        # Procesar audio
+        asyncio.run_coroutine_threadsafe(
+            self.process_recorded_audio(audio_path),
+            self.page.loop
+        )
+    async def process_recorded_audio(self, audio_path):
         try:
-            if e.files and len(e.files) > 0:
-                file_path = e.files[0].path
-
-                # Generar nombre único para el audio
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                audio_name = f"book_audio_{timestamp}{Path(file_path).suffix}"
-                audio_path = Path(self.audio_dir) / audio_name
-
-                # Copiar audio al directorio de audios
-                shutil.copy2(file_path, audio_path)
-
-                # Procesar audio
-                self.status_text.value = "Procesando audio..."
-                self.page.update()
-
-                text = await self.audio_recognition.process_audio(str(audio_path))
-
-                # Agregar el texto al campo de búsqueda
-                current_text = self.search_field.value or ""
-                self.search_field.value = current_text + "\n" + text if current_text else text
-
-                self.status_text.value = "Audio procesado correctamente"
-
+            # Convertir si es necesario (en este caso ya está en WAV)
+            text = await self.audio_recognition.process_audio(audio_path)
+            
+            # Actualizar campo de búsqueda
+            current_text = self.search_field.value or ""
+            self.search_field.value = f"{current_text}\n{text}" if current_text else text
+            self.status_text.value = "Grabación procesada correctamente"
         except Exception as ex:
-            self.status_text.value = f"Error procesando audio: {str(ex)}"
+            self.status_text.value = f"Error procesando grabación: {str(ex)}"
         finally:
             self.page.update()
+    def toggle_recording(self, e):
+        if not self.is_recording:
+            self.start_recording()
+        else:
+            self.stop_recording()
 
     def create_book_card(self, book):
         cover_image = ft.Image(

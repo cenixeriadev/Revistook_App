@@ -1,14 +1,14 @@
 import speech_recognition as sr
 from pathlib import Path
 import logging
-
+from pydub import AudioSegment
 
 class SpeechRecognitionModel:
     def __init__(self):
         """Initialize speech recognition model"""
         self.recognizer = sr.Recognizer()
         self.logger = logging.getLogger(__name__)
-
+    
     def transcribe_audio(self, audio_path: str | Path) -> str:
         """
         Transcribe audio file to text
