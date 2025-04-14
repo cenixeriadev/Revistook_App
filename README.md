@@ -1,5 +1,5 @@
 # Revistook App
-
+[![Build Windows Executable for Flet](https://github.com/cenixeriadev/Revistook_App/actions/workflows/main.yml/badge.svg)](https://github.com/cenixeriadev/Revistook_App/actions/workflows/main.yml)
 A Python desktop application built with Flet that allows users to search for and download books from Library Genesis (libgen.li) using Selenium WebDriver. The app includes OCR capabilities to scan text from images and audio transcription for voice input.
 
 
