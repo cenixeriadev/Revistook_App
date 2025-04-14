@@ -189,9 +189,10 @@ class BookDownloaderApp:
                 # Procesar imagen con OCR
                 self.status_text.value = "Procesando imagen..."
                 self.page.update()
-
+                #TODO: IMPLEMENTATION COMPARE_IMAGES AND FILTER BOOKS THEN UPDATE_UI
                 text = await self.text_recognition.process_image(str(image_path))
-
+                
+                
                 # Agregar el texto al campo de búsqueda
                 current_text = self.search_field.value or ""
                 self.search_field.value = current_text + "\n" + text if current_text else text
