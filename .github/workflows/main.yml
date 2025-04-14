@@ -1,0 +1,32 @@
+name: Build Windows Executable for Flet
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.12.6'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flet
+
+    - name: Package app with Flet Pack
+      run: |
+        flet pack main.py
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: flet-windows-executable
+        path: dist/
