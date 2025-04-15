@@ -13,4 +13,4 @@ else:
 sys.path.insert(0, os.path.join(base_path, "src"))
 
 if __name__ == "__main__":
-    runpy.run_module("presentation.main", run_name="__main__")
+    runpy.run_module("src.presentation.main", run_name="__main__")
