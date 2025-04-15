@@ -23,6 +23,7 @@ jobs:
         pip install pyinstaller
     - name: Verify __init__.py files
       run: |
+        ls
         ls src/
         ls src/presentation/
         ls src/presentation/views/
