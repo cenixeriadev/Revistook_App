@@ -21,7 +21,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
-
+    - name: Verify __init__.py files
+      run: |
+        ls src/
+        ls src/presentation/
+        ls src/presentation/views/
+        
     - name: Package app with Flet Pack
       run: |
         flet pack launcher.py
