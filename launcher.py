@@ -2,15 +2,28 @@ import sys
 import os
 import runpy
 
-if getattr(sys, 'frozen', False):
-    
-    base_path = sys._MEIPASS
-else:
-    
-    base_path = os.path.dirname(os.path.abspath(__file__))
+def get_base_path():
+    if getattr(sys, 'frozen', False):
+        # Cuando se ejecuta como un ejecutable empaquetado
+        return sys._MEIPASS
+    else:
+        # Cuando se ejecuta desde el código fuente
+        return os.path.dirname(os.path.abspath(__file__))
 
+# Obtener la ruta base
+base_path = get_base_path()
 
-sys.path.insert(0, os.path.join(base_path, "src"))
+# Agregar la ruta absoluta de 'src' al sys.path
+src_path = os.path.join(base_path, "src")
+sys.path.insert(0, src_path)
+
+# Verificar si el módulo 'presentation' existe
+try:
+    import presentation
+    print("Module 'presentation' imported successfully.")
+except ImportError as e:
+    print(f"Failed to import 'presentation': {e}")
+    sys.exit(1)
 
 if __name__ == "__main__":
     runpy.run_module("presentation.main", run_name="__main__")

@@ -29,7 +29,10 @@ jobs:
 
     - name: Package app with Flet Pack
       run: |
-        flet pack launcher.py
+        flet pack launcher.py --onefile --windowed \
+          --add-data "src;src" \
+          --hidden-import=src.presentation \
+          --hidden-import=src.presentation.views \
 
     - name: Run generated executable to test
       run: |
