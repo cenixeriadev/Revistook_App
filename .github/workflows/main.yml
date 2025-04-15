@@ -1,4 +1,4 @@
-name: Build Windows Executable for Flet
+name: Build and Test Windows Executable for Flet
 
 on:
   push:
@@ -20,11 +20,21 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller  
+        pip install pyinstaller
 
     - name: Package app with Flet Pack
       run: |
         flet pack launcher.py
+
+    - name: Run generated executable to test
+      run: |
+        echo "Testing the executable..."
+        .\dist\launcher.exe > execution_log.txt 2>&1 || (
+          echo "❌ The executable crashed! Log:"
+          type execution_log.txt
+          exit 1
+        )
+        echo "✅ Executable ran successfully!"
 
     - name: Upload executable
       uses: actions/upload-artifact@v4
