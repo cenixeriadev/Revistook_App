@@ -38,7 +38,7 @@ jobs:
     - name: Run generated executable to test
       run: |
         echo "Testing the executable..."
-        .\dist\launcher.exe > execution_log.txt 2>&1 || (echo "❌ The executable crashed! Log: "type execution_log.txt exit 1)
+        .\dist\Revistook_App.exe > execution_log.txt 2>&1 || (echo "❌ The executable crashed! Log: "type execution_log.txt exit 1)
         echo "✅ Executable ran successfully!"
 
     - name: Upload executable
