@@ -37,7 +37,7 @@ jobs:
             --hidden-import=presentation.main_view `
             --hidden-import=domain `
             --hidden-import=infrastructure `
-            --hidden-import = application
+            --hidden-import=application
 
     - name: Run generated executable to test
       run: |
