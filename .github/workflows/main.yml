@@ -30,7 +30,7 @@ jobs:
 
     - name: Package app with Flet Pack
       run: |
-        pyinstaller launcher.py --name=Revistook_App --onefile --windowed `
+        flet pack launcher.py --name=Revistook_App --onefile --windowed `
           --add-data "src;src" `
           --hidden-import=presentation `
           --hidden-import=presentation.views `
