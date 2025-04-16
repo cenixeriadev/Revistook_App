@@ -19,11 +19,11 @@ sys.path.insert(0, src_path)
 
 # Verificar si el módulo 'presentation' existe
 try:
-    import presentation
+    import src.presentation
     print("Module 'presentation' imported successfully.")
 except ImportError as e:
     print(f"Failed to import 'presentation': {e}")
     sys.exit(1)
 
 if __name__ == "__main__":
-    runpy.run_module("presentation.main", run_name="__main__")
+    runpy.run_module("src.presentation.main", run_name="__main__")
