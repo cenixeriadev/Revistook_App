@@ -10,7 +10,7 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import numpy as np
 from datetime import datetime
-from src.application.services.book_downloader import BookDownloader
+from src.application.services.book_downloaderis import BookDownloader
 from src.application.services.text_recognition import TextRecognitionService
 from src.application.services.audio_recognition import AudioRecognitionService
 from src.domain.entities.download_status import DownloadStatus, DownloadState

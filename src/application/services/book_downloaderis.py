@@ -10,10 +10,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from src.domain.entities.book import Book
 from typing import Optional, Callable
+import logging
+
 class BookDownloader:
     def __init__(self):
         self.driver = None
-        self.base_url = "https://libgen.li/"
+        self.base_url = "https://libgen.is"
         
     async def initialize_driver(self):
         """Inicializa el driver de Selenium en un hilo separado"""
@@ -22,7 +24,7 @@ class BookDownloader:
         chrome_options.add_argument("--headless")  # Ejecución en segundo plano
         self.driver = await loop.run_in_executor(
             None, 
-            lambda: webdriver.Chrome(options=chrome_options)
+            lambda: webdriver.Chrome(options= chrome_options)
         )
 
     async def search(self, query: str) -> List[Book]:
@@ -37,64 +39,64 @@ class BookDownloader:
                 lambda: self.driver.get(self.base_url)
             )
 
-            WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//label[@for="covers"]'))
-            ).click()
+           
             
             # Buscar elementos y escribir
-            search_form = await self.find_element(By.XPATH, '/html/body/form/div[1]/input')
+            search_form = await self.find_element(By.XPATH, '/html/body/table/tbody[2]/tr/td[2]/form/input[1]')
             search_form.send_keys(query)
 
             # Hacer clic en botón de búsqueda
             search_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[1]/div[1]/button'))
+                EC.element_to_be_clickable((By.XPATH, '/html/body/table/tbody[2]/tr/td[2]/form/input[2]'))
             )
             search_button.click()
 
             # Ordenar por año
             BtnYear = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, '//*[@id="tablelibgen"]/thead/tr/th[5]/nobr/a'))
+                EC.element_to_be_clickable((By.XPATH, '/html/body/table[3]/tbody/tr[1]/td[5]/b/a'))
             )
-            BtnYear.click()
-            BtnYear = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, '//*[@id="tablelibgen"]/thead/tr/th[5]/nobr/a'))
-            )
-            BtnYear.click() # ponemos primero los libros más nuevos
+            BtnYear.click()# ponemos primero los libros más nuevos
             
             # Obtener resultados (adaptar según estructura real de la página)
-            books = []
+            books = []#/html/body/table[3]/tbody/tr[1] /html/body/table[3]/tbody/tr
             WebDriverWait(self.driver, 15).until(
-            EC.presence_of_element_located((By.XPATH, '//*[@id="tablelibgen"]/tbody/tr'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/table[3]/tbody/tr'))
             )
-            rows = await self.find_elements(By.XPATH, '//*[@id="tablelibgen"]/tbody/tr')
+            rows = await self.find_elements(By.XPATH, '/html/body/table[3]/tbody/tr')
             
 
-            for i, row in enumerate(rows[1:10]):
+            for i, row in enumerate(rows[2:10]):
                 cells = row.find_elements(By.TAG_NAME, 'td')
-                try:
-                    img_element = cells[0].find_element(By.TAG_NAME, 'img')
-                
+                try:#/html/body/table[3]/tbody/tr[2]/td[1]
+                    mirror = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, f"/html/body/table[3]/tbody/tr[{i + 2}]/td[10]/a"))
+                    )
                     
-                    cover_url = img_element.get_attribute('src').replace('_small' , '')
+                    mirror.click()
                     
+                    img_element = await self.find_element(By.XPATH, '//*[@id="info"]/div[2]/img')
+                    
+                    cover_url = img_element.get_attribute('src')
+                    
+                    print(cover_url)
                     if cover_url=='':
                         cover_url = "https://e7.pngegg.com/pngimages/829/733/png-clipart-logo-brand-product-trademark-font-not-found-logo-brand.png"
-                    if not cover_url.startswith('http' or 'https'):
-                        cover_url = f"{self.base_url.rstrip('/')}{cover_url}"
+                    
     
                     
-                except:
+                except Exception as e:
                     cover_url = ""
-                
-                book = Book(
-                    id=str(i),
-                    title=cells[1].find_elements(By.TAG_NAME, 'a')[0].text,
-                    author=cells[2].text,
-                    url=cells[9].find_elements(By.TAG_NAME, 'a')[0].get_attribute('href'),
-                    cover_url=cover_url
-                )
-                books.append(book)
-            
+                    logging.error(" Error al obtener la imagen del libro  : %s", e)
+                finally:
+                    book = Book(
+                        id=str(i),
+                        title= self.driver.find_element(By.XPATH, '//*[@id="info"]/h1').text,  
+                        author= self.driver.find_element(By.XPATH, '//*[@id="info"]/p[1]').text,
+                        url= self.driver.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/div[1]/h2[1]/a').get_attribute('href'),
+                        cover_url=cover_url
+                    )
+                    books.append(book)
+                self.driver.back()
             return books
 
         except Exception as e:
@@ -108,7 +110,7 @@ class BookDownloader:
         progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> Optional[str]:
         try:
-            await self.get_download_url(book)
+           
             return await self.download_file(
                 book.url, 
                 download_path, 
@@ -118,15 +120,7 @@ class BookDownloader:
         except Exception as e:
             print(f"Error final en descarga: {str(e)}")
             return None
-    async def get_download_url(self, book: Book):
-        """Obtiene la URL directa de descarga"""
-        await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: self.driver.get(book.url)
-        )
-        
-        download_link = await self.find_element(By.XPATH, '/html/body/table/tbody/tr[1]/td[2]/a')
-        book.url = download_link.get_attribute('href')
+    
 
     async def download_file(
         self, 
