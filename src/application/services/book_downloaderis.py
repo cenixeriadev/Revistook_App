@@ -2,15 +2,16 @@
 # src/application/services/book_downloader.py
 import os
 import asyncio
-from typing import List
+from typing import List, Dict, Optional, Callable
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from src.domain.entities.book import Book
-from typing import Optional, Callable
 import logging
+import io
+import mimetypes
 
 class BookDownloader:
     def __init__(self):
@@ -65,35 +66,36 @@ class BookDownloader:
             rows = await self.find_elements(By.XPATH, '/html/body/table[3]/tbody/tr')
             
 
-            for i, row in enumerate(rows[2:10]):
-                cells = row.find_elements(By.TAG_NAME, 'td')
+            for i, row in enumerate(rows[2:22]):
                 try:#/html/body/table[3]/tbody/tr[2]/td[1]
+                    file_format = row.find_element(By.CSS_SELECTOR ,  "td[nowrap]:nth-child(9)").text.strip()
+                    
+                    
                     mirror = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, f"/html/body/table[3]/tbody/tr[{i + 2}]/td[10]/a"))
                     )
-                    
                     mirror.click()
                     
                     img_element = await self.find_element(By.XPATH, '//*[@id="info"]/div[2]/img')
                     
                     cover_url = img_element.get_attribute('src')
                     
-                    print(cover_url)
+                    
                     if cover_url=='':
                         cover_url = "https://e7.pngegg.com/pngimages/829/733/png-clipart-logo-brand-product-trademark-font-not-found-logo-brand.png"
                     
-    
                     
                 except Exception as e:
                     cover_url = ""
                     logging.error(" Error al obtener la imagen del libro  : %s", e)
                 finally:
                     book = Book(
-                        id=str(i),
+                        id=str(i-1),
                         title= self.driver.find_element(By.XPATH, '//*[@id="info"]/h1').text,  
                         author= self.driver.find_element(By.XPATH, '//*[@id="info"]/p[1]').text,
                         url= self.driver.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/div[1]/h2[1]/a').get_attribute('href'),
-                        cover_url=cover_url
+                        cover_url=cover_url,
+                        file_format= file_format
                     )
                     books.append(book)
                 self.driver.back()
@@ -115,10 +117,12 @@ class BookDownloader:
                 book.url, 
                 download_path, 
                 book.title,
+                book.file_format,
                 progress_callback
             )
         except Exception as e:
             print(f"Error final en descarga: {str(e)}")
+            logging.error(f"Error detallado en descarga: {str(e)}", exc_info=True)
             return None
     
 
@@ -127,6 +131,7 @@ class BookDownloader:
         url: str, 
         path: str, 
         filename: str,
+        file_format: str,
         progress_callback: Optional[Callable[[int, int], None]] = None
     )-> str:
         """Descarga asíncrona con seguimiento de progreso"""
@@ -138,7 +143,7 @@ class BookDownloader:
             return "".join(c for c in name if c.isalnum() or c in " .-_")
         
         sanitized_name = sanitize(filename)
-        file_path = os.path.join(path, f"{sanitized_name}.pdf")
+        file_path = os.path.join(path, f"{sanitized_name}.{file_format}")
         
         try:
             async with ClientSession() as session:
@@ -161,6 +166,7 @@ class BookDownloader:
                     return file_path
                     
         except Exception as e:
+            logging.error(f"Error inesperado durante la descarga: {str(e)}", exc_info=True)
             print(f"Error en descarga: {str(e)}")
             if os.path.exists(file_path):
                 os.remove(file_path)

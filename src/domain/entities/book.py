@@ -8,5 +8,5 @@ class Book:
     author: str
     url: str
     cover_url: str  # Nuevo campo para la imagen
-    file_format: str = "PDF"
+    file_format: str 
 
