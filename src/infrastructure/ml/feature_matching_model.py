@@ -45,12 +45,26 @@ class FeatureMatchingModel:
         matches = sorted(matches, key=lambda x: x.distance)
         return matches
 
-    def compare_images(self , min_matches=40):
+    def compare_images(self , min_matches=100)->bool:
         img1, img2 = self.load_images()
         kp1, des1 = self.detect_and_compute(img1)
         kp2, des2 = self.detect_and_compute(img2)
+
+        # Si no se detectaron descriptores, abortar
+        if des1 is None or des2 is None:
+            self.logger.info("No se detectaron descriptores en una de las imágenes.")
+            return False
+
         matches = self.match_features(des1, des2)
-        return len(matches) > min_matches
+
+        
+        self.logger.info(f"Número de matches encontrados: {len(matches)}")
+        
+        match_ratio = len(matches) / max(len(kp1), len(kp2)) if max(len(kp1), len(kp2)) > 0 else 0
+        
+        self.logger.info(f"Match ratio: {match_ratio:.2f}")
+        
+        return len(matches) > min_matches and match_ratio > 0.3
     #TODO: Tipar correctamente los outputs and inputs de las funciones
     
     

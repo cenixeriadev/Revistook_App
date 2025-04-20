@@ -11,9 +11,11 @@ from scipy.io.wavfile import write
 import numpy as np
 from datetime import datetime
 from src.application.services.book_downloaderis import BookDownloader
+from src.application.services.compare_images import CompareImagesService
 from src.application.services.text_recognition import TextRecognitionService
 from src.application.services.audio_recognition import AudioRecognitionService
 from src.domain.entities.download_status import DownloadStatus, DownloadState
+import logging
 
 
 class BookDownloaderApp:
@@ -21,6 +23,7 @@ class BookDownloaderApp:
         self.book_downloader = BookDownloader()
         self.text_recognition = TextRecognitionService()
         self.audio_recognition = AudioRecognitionService()
+        self.compare_images = CompareImagesService()
         self.page = None
         self.download_tasks = {}
         self.setup_directories()
@@ -93,7 +96,7 @@ class BookDownloaderApp:
 
         # Botón para capturar imagen
         camera_button = ft.ElevatedButton(
-            "Capturar imagen",
+            "Filtrar por imagen",
             icon=ft.icons.CAMERA_ALT,
             on_click=lambda _: self.image_picker.pick_files(
                 allow_multiple=False,
@@ -182,27 +185,34 @@ class BookDownloaderApp:
                 # Copiar imagen al directorio de imágenes
                 shutil.copy2(file_path, image_path)
 
-                # Mostrar vista previa
-                self.preview.src = str(image_path)
-                self.preview.visible = True
+                print(image_path)
 
-                # Procesar imagen con OCR
-                self.status_text.value = "Procesando imagen..."
+
+                self.progress_bar.visible = True
+                self.status_text.value = "Filtrando libros..."
                 self.page.update()
-                #TODO: IMPLEMENTATION COMPARE_IMAGES AND FILTER BOOKS THEN UPDATE_UI
-                text = await self.text_recognition.process_image(str(image_path))
                 
+                self.results_list.controls.clear()
                 
-                # Agregar el texto al campo de búsqueda
-                current_text = self.search_field.value or ""
-                self.search_field.value = current_text + "\n" + text if current_text else text
+                self.results_list.update()
+                for  book in self.current_results:
+                    result = await self.compare_images.compare_images(image_path, book)
+                    print(f"Comparando con {book.title}: {result}")
+                    if result:
+                        self.results_list.controls.append(self.create_book_card(book))
+                        self.results_list.update()
+                    else:
+                        print(f"El libro {book.title} no coincide con la imagen.")
 
+                
                 self.status_text.value = "Imagen procesada correctamente"
-
+                self.page.update()
         except Exception as ex:
-            self.status_text.value = f"Error procesando imagen: {str(ex)}"
+            self.status_text.value = f"Error filtrando por  imagen: {str(ex)}"
         finally:
+            self.progress_bar.visible = False
             self.page.update()
+            
     def handle_directory_picked(self, e: ft.FilePickerResultEvent):
         if e.path:
             self.download_dir = e.path
