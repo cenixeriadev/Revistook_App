@@ -12,7 +12,6 @@ import numpy as np
 from datetime import datetime
 from src.application.services.book_downloaderis import BookDownloader
 from src.application.services.compare_images import CompareImagesService
-from src.application.services.text_recognition import TextRecognitionService
 from src.application.services.audio_recognition import AudioRecognitionService
 from src.domain.entities.download_status import DownloadStatus, DownloadState
 import logging
@@ -21,7 +20,6 @@ import logging
 class BookDownloaderApp:
     def __init__(self):
         self.book_downloader = BookDownloader()
-        self.text_recognition = TextRecognitionService()
         self.audio_recognition = AudioRecognitionService()
         self.compare_images = CompareImagesService()
         self.page = None
