@@ -8,7 +8,7 @@ A Python desktop application built with Flet that allows users to search for and
 
 ## Features
 
-- 📚 Search for books on Library Genesis (libgen.li)
+- 📚 Search for books on Library Genesis (libgen.li or libgen.is)
 - ⬇️ Download books directly to your specified location
 - 📷 Filter results by image
 - 🎤 Convert speech to text from audio files
