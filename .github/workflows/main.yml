@@ -3,6 +3,8 @@ name: Build and Test Windows Executable for Flet
 on:
   push:
     branches: ["main"]
+    paths:
+      - 'src/**'
 
 jobs:
   build:
