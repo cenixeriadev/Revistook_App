@@ -2,20 +2,23 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+> [!NOTE]
+> This project has not yet had an official release. As such, there are currently no officially supported versions.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+Security support will begin once the first stable version (v1.0.0) is published.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+Even though this project is in early development, we welcome reports of any security concerns to ensure a safe and secure first release.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+To report a vulnerability:
+
+* **Email**: codeartprogrammer@gmail.com 
+
+* **Preferred method**: Private email or GitHub Security Advisories
+
+* **Expected response time**: Within 3 business days
+
+Please do not disclose vulnerabilities publicly without prior coordination.
+
+
