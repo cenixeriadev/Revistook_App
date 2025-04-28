@@ -2,10 +2,13 @@
 
 ## Supported Versions
 
-> [!NOTE]
-> This project has not yet had an official release. As such, there are currently no officially supported versions.
+Revistook_App is currently in development and hasn't had an official release yet. Once we launch version 1.0, We'll provide a table of supported versions here.
 
-Security support will begin once the first stable version (v1.0.0) is published.
+| Version | Supported          |
+| ------- | ------------------ |
+| dev     | :white_check_mark: |
+
+
 
 ## Reporting a Vulnerability
 
