@@ -1,10 +1,18 @@
-name: Build and Test Windows Executable for Flet
+name: Build and Release
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - 'src/**'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión semántica (ej: v1.0.0)"
+        required: true
+        default: "v0.1.0"
+      release_title:
+        description: "Título del release"
+        required: false
+      release_notes:
+        description: "Notas del release"
+        required: false
 
 jobs:
   build:
@@ -52,3 +60,12 @@ jobs:
       with:
         name: flet-windows-executable
         path: dist/
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.version }}
+        name: ${{ github.event.inputs.release_title || format('Release {0}', github.event.inputs.version) }}
+        body: ${{ github.event.inputs.release_notes }}
+        files: dist/Revistook_App.exe        
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
