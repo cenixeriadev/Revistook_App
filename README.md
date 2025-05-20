@@ -1,6 +1,6 @@
 # Revistook App
 
-[![CodeQL Advanced](https://github.com/cenixeriadev/Revistook_App/actions/workflows/codeql.yml/badge.svg)](https://github.com/cenixeriadev/Revistook_App/actions/workflows/codeql.yml) [![Build Windows Executable for Flet](https://github.com/cenixeriadev/Revistook_App/actions/workflows/main.yml/badge.svg)](https://github.com/cenixeriadev/Revistook_App/actions/workflows/main.yml)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Python Version](https://img.shields.io/badge/python-3.12.6-blue.svg)](https://www.python.org/downloads/release/python-390/)
+[![CodeQL Advanced](https://github.com/cenixeriadev/Revistook_App/actions/workflows/codeql.yml/badge.svg)](https://github.com/cenixeriadev/Revistook_App/actions/workflows/codeql.yml)[![Build and Release](https://github.com/cenixeriadev/Revistook_App/actions/workflows/build-release.yml/badge.svg)](https://github.com/cenixeriadev/Revistook_App/actions/workflows/build-release.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Python Version](https://img.shields.io/badge/python-3.12.6-blue.svg)](https://www.python.org/downloads/release/python-390/)
 
 A Python desktop application built with Flet that allows users to search for and download books from Library Genesis (libgen.li) using Selenium WebDriver. The app includes OpenCV capabilities to scan images and then use it for filter results.
 
