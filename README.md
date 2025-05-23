@@ -119,12 +119,8 @@ The application automatically creates directories for storing temporary files:
 ### Common Issues
 
 - **WebDriver issues**: Ensure you have the latest version of Chrome or Firefox installed
-- **OCR not working**: Verify that Tesseract OCR is properly installed and accessible in your PATH
 - **Download failures**: Check your internet connection and verify that the book is available
 
-### Error Logs
-
-Check the application's console output for detailed error messages.
 
 ## Contributing
 
