@@ -66,13 +66,13 @@ Revistook_app/
 
 2. Create a virtual environment and activate it:
    ```bash
-   python -m venv venv
+   python -m venv .venv
    
    # On Windows
-   venv\Scripts\activate
+   .venv\Scripts\Activate.ps1
    
    # On macOS/Linux
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 3. Install dependencies:
