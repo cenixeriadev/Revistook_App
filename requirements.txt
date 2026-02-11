@@ -33,7 +33,7 @@ opencv-python==4.11.0.86
 outcome==1.3.0.post0
 packaging==24.2
 pefile==2023.2.7
-pillow==11.1.0
+pillow==12.1.1
 propcache==0.3.0
 pycparser==2.22
 pydub==0.25.1
