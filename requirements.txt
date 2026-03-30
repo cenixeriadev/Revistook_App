@@ -37,7 +37,7 @@ pillow==12.1.1
 propcache==0.3.0
 pycparser==2.22
 pydub==0.25.1
-Pygments==2.19.1
+Pygments==2.20.0
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2025.2
 pypng==0.20220715.0
